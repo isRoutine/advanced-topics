@@ -1,7 +1,31 @@
 import pandas as pd
 import math
 
-USER_A = 4
+
+# function: sim -> get the Pearson correlation between two users
+# parameter
+#   userA_ratings: DataFrame
+#   userB_ratings: DataFrame
+#   commonColumns: [string]
+#
+# return
+#   similarity: float | nan
+def sim(userA_ratings, userB_ratings, commonColumns):
+    common = pd.merge(userA_ratings, userB_ratings, how ='inner', on = commonColumns)
+    if common.empty == True:
+        return math.nan
+    else:
+        return common['rating_x'].corr(common['rating_y'])
+
+# function: sim -> get average rating for user
+# parameter
+#   ratings: DataFrame
+# return
+#   average: float
+def avg(ratings):
+   average = ratings['rating'].sum()/len(ratings)
+
+USER_A = 1
 
 # import csv file and drop unuseful colunmns
 ratings = pd.read_csv("dataset/ratings.csv").drop(['timestamp'], axis=1)
@@ -11,10 +35,14 @@ ratings = ratings[ratings['userId'] != USER_A] # dataframe that contains ratings
 similarity = dict() # dict for similarity { key='userid' : value = similarity}
 
 # rows are ordered by userId, analyze the dataframe for all users
+#for index, row in ratings.iterrows():
 while ratings.shape[0] > 0:
 
-    # read the userId of the first row and select all the rows(ratings) for this user
+        # read the userId of the first row and select all the rows(ratings) for this user
     userB_id = float(ratings.iloc[0]['userId'])
+
+    # read the userId of the first row and select all the rows(ratings) for this user
+    #userB_id = row['userId']
     userB_ratings = ratings[ratings['userId'] == userB_id]
 
     # create a dataframe that contains only the ratings on the common movies between the two users
@@ -34,3 +62,7 @@ while ratings.shape[0] > 0:
 similarity = dict(sorted(similarity.items(), key=lambda x:x[1], reverse=True)[:10])
 
 print(similarity)
+
+avgUserA_rating = userA_ratings['rating'].sum()/len(userA_ratings)
+print(avgUserA_rating)
+print(avg(userA_ratings))
